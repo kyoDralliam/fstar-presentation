@@ -1,5 +1,6 @@
-(* This resides in a file called helloWorld.fst *)
+(*** Our first program in F* ***)
 module HelloWorld
+(* This resides in a file called helloWorld.fst *)
 
 open FStar.All
 
@@ -8,10 +9,14 @@ let main () : ML unit =
   FStar.IO.print_string "Hello World !"
 
 
-(* And we can call it. *)
+(******************************************************************************)
+(*** Program in action ***)
+
+(* We can call the main *)
 let () = main ()
 
-(* To see it in action we need to extract it to some other language for example OCaml : *)
+(* To see it in action we need to extract it to some other language*)
+(* for example in OCaml : *)
 
 (*! fstar.exe --codegen OCaml helloWorld.fst *)
 

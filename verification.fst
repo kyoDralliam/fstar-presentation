@@ -1,5 +1,5 @@
 (*** From the standard lib ***)
-module Proving
+module Verification
 
 open FStar.List.Tot
 
@@ -49,7 +49,7 @@ let tail1 (#a:Type) (l:list a{Cons? l}) : list a =
 (******************************************************************************)
 (*** Examples of refinements ***)
 
-let nat = k:int{ 0 < k }
+let nat' = k:int{ 0 < k }
 
 let palindrome (a:Type) = l:list a{ l == rev l }
 
@@ -71,6 +71,19 @@ let tail2 (a:Type) (l:list a)
   | _ :: xs -> xs
 
 (*+ Pure type precondition postcondition +*)
+
+(******************************************************************************)
+(*** Formulas ***)
+
+let formula = Type0
+
+let phi1 (n:int) = n < 3 \/ (n > 27 ==> n % 2 == 0)
+
+let phi2 = forall (l:list int). Cons? l ==> Cons?.hd l == 5
+
+let phi3 = forall (l:list int). exists (x:int). l == [] \/ Cons?.hd l == x
+
+let bool_as_formula (b:bool) = b == true (* standard name : b2t *)
 
 (******************************************************************************)
 (*** Proving things ***)
@@ -101,7 +114,7 @@ let rec length_map (#a #b:Type) (f:a -> b) (l:list a)
 (*! In pratice : set up the skeleton with admit !*)
 
 (******************************************************************************)
-(*+ Termination +*)
+(*** Termination ***)
 
 
 let rec foldl (#a #b:Type) (f : a -> b -> a) (acc:a) (l:list b)
@@ -130,3 +143,49 @@ let list_tail_ordering (#a:Type) (l:list a{Cons? l}) =
 
 let _ = %[3 ; 42] << %[4 ; 4]
 let _ = %[2 ; Some 3 ; 7] << %[2 ; Some 5 ; ()]
+
+(******************************************************************************)
+(*** Let's try it out ***)
+
+
+val length: list 'a -> Tot nat
+let rec length l = match l with
+  | [] -> 0 <: nat
+  | _ :: tl -> 1 + length tl
+
+val append : list 'a -> list 'a -> Tot (list 'a)
+let rec append l1 l2 = match l1 with
+  | [] -> l2
+  | hd :: tl -> hd :: append tl l2
+
+(* Prove this lemma *)
+val append_len: l1:list 'a -> l2:list 'a ->
+  Lemma (requires True)
+    (ensures (length (append l1 l2) = length l1 + length l2))
+let rec append_len l1 l2 = admit()
+
+
+(******************************************************************************)
+(*** Proving an equality ***)
+
+val reverse: list 'a -> Tot (list 'a)
+let rec reverse l =
+  match l with
+  | [] -> []
+  | hd::tl -> append (reverse tl) [hd]
+let snoc l h = append l [h]
+
+val snoc_cons: l:list 'a -> h:'a -> Lemma (reverse (snoc l h) == h::reverse l)
+let rec snoc_cons l h = match l with
+  | [] -> ()
+  | hd::tl -> snoc_cons tl h
+
+
+val rev_involutive: l:list 'a -> Lemma (reverse (reverse l) == l)
+let rec rev_involutive l = match l with
+  | [] -> ()
+  | hd::tl -> rev_involutive tl; snoc_cons (reverse tl) hd
+
+val rev_injective : l1:list 'a -> l2:list 'a
+                  -> Lemma (requires (reverse l1 == reverse l2))
+                          (ensures  (l1 == l2))

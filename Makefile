@@ -1,4 +1,7 @@
-FSTAR_HOME=../everest/FStar
+
+# https://github.com/kyoDralliam/fstar-presentation.git
+
+FSTAR_HOME=../FStar
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 

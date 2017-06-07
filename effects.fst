@@ -23,9 +23,10 @@ effect State (a:Type) = St a
 let state_pre = heap -> Type0
 let state_post (a:Type) = a -> heap -> Type0
 
-let state_wp (a:Type) = state_pre -> state_post a
+let state_wp (a:Type) = state_post a -> state_pre
 
 effect StateWP (a:Type) (wp:st_wp a) = STATE a wp
+
 effect StatePrePost (a:Type) (pre:st_pre) (post:heap -> st_post a) = ST a pre post
 
 (******************************************************************************)

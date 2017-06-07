@@ -1,7 +1,7 @@
 (*** From the standard lib ***)
 module Verification
 
-open FStar.List.Tot
+open FStar.List.Tot.Base
 
 (* Some syntactic sugar *)
 let nil = []
@@ -49,7 +49,7 @@ let tail1 (#a:Type) (l:list a{Cons? l}) : list a =
 (******************************************************************************)
 (*** Examples of refinements ***)
 
-let nat' = k:int{ 0 < k }
+let nat' = k:int{ 0 <= k }
 
 let palindrome (a:Type) = l:list a{ l == rev l }
 
@@ -113,15 +113,24 @@ let rec length_map (#a #b:Type) (f:a -> b) (l:list a)
 
 (*! In pratice : set up the skeleton with admit !*)
 
+let rec append_length_lemma (#a:Type) (l1 l2:list a)
+  : Pure unit
+    (requires True)
+    (ensures (fun () -> length (l1 `append` l2) == length l1 + length l2))
+= admit ()
+
 (******************************************************************************)
 (*** Termination ***)
 
 
 let rec foldl (#a #b:Type) (f : a -> b -> a) (acc:a) (l:list b)
-  : Tot a (decreases l)
+  : Tot a (decreases (length l))
 = match l with
   | [] -> acc
   | x :: xs -> foldl f (f acc x) xs
+
+// let vc = length xs << length l
+
 
 (*! decreases clauses gives some decreasing measure !*)
 (*! it contains an arbitrary total term !*)
@@ -141,8 +150,8 @@ let list_tail_ordering (#a:Type) (l:list a{Cons? l}) =
 
 (*+ - lexicographic ordering +*)
 
-let _ = %[3 ; 42] << %[4 ; 4]
-let _ = %[2 ; Some 3 ; 7] << %[2 ; Some 5 ; ()]
+let _ = assert (%[3 ; 42] << %[4 ; 4])
+let _ = assert (%[2 ; 3 ; 7] << %[2 ; 5 ; ()])
 
 (******************************************************************************)
 (*** Let's try it out ***)

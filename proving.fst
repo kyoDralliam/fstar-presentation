@@ -15,12 +15,13 @@ let l0 = 1 :: 2 :: 3 :: []
 
 (******************************************************************************)
 (*** Off with their heads ***)
+
+
 (* What about getting the tail of a list ? *)
 let tail0 (#a:Type) (l:list a) : list a =
   match l with
   | _ :: xs -> xs
   | [] -> admit ()
-
 
 
 
@@ -30,13 +31,13 @@ let tail0 (#a:Type) (l:list a) : list a =
 (******************************************************************************)
 (*** Refinements to the rescue ***)
 
+
 let tail1 (#a:Type) (l:list a{Cons? l}) : list a =
   match l with
   | _ :: xs -> xs
 
 
 (*+ l:list a{Cons? l} +*)
-
 
 
 
@@ -56,6 +57,20 @@ let valid_index (#a:Type) (l:list a) = k:nat{k < length l}
 
 let keep_parity = f:(nat -> nat){forall (x:nat). x % 2 == f x % 2}
 
+(*! Refinements generate a subtyping relation <: !*)
+(*! x:a{p x} <: a !*)
+
+(******************************************************************************)
+(*** Pure ***)
+
+let tail2 (a:Type) (l:list a)
+  : Pure (list a)
+    (requires (Cons? l))
+    (ensures (fun _ -> True))
+= match l with
+  | _ :: xs -> xs
+
+(*+ Pure type precondition postcondition +*)
 
 (******************************************************************************)
 (*** Proving things ***)
@@ -65,7 +80,7 @@ let length_cons (#a:Type) (x:a) (l:list a)
 = ()
 
 (*! The fact is trivial and the proof is too !*)
-(*! What about proving that map preserves length !*)
+(*! What about proving that map preserves length ? !*)
 
 let length_map0 (#a #b:Type) (f:a -> b) (l:list a)
   : Lemma (length (map f l) == length l)
